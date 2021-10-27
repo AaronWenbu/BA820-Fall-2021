@@ -1,4 +1,5 @@
 # import numpy as np
+from operator import index
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -14,6 +15,7 @@ from sklearn.datasets import make_blobs
 from sklearn.preprocessing import StandardScaler
 
 import scikitplot as skplt
+
 
 
 
@@ -39,6 +41,52 @@ eo.head(3)
 
 # state an index
 # just numeric data
+
+eo.columns = eo.columns.str.lower()
+
+eo.index = eo.abr
+
+election = eo.loc[:,"income":"dem.rep"]
+
+
+
+# standardized
+
+
+# caculate z score
+scaler = StandardScaler()
+escaled = scaler.fit_transform(election)
+
+# cluster now
+hc1.shape
+hc1 = linkage(escaled, method = 'complete')
+
+
+# plot
+
+plt.figure(figsize=(15,5))
+dendrogram(hc1,labels = election.index)
+plt.show()
+
+
+
+# extract 4 clusters
+
+eo['cluster'] = fcluster(hc1,4, criterion='maxclust')
+eo.sample(3)
+
+
+
+# value counts
+#counts on each cluster
+eo.cluster.value_counts()
+
+
+#profiling
+eo.groupby('cluster')['obamawin'].mean()
+
+
+
 eo.index = eo.State
 eo.drop(columns="State", inplace=True)
 
@@ -69,10 +117,12 @@ eo.cluster.value_counts()
 eo.loc[eo.cluster==4, :]
 
 
+
+
 ######### KMEANS
 
 SQL = "SELECT * from `questrom.datasets.judges`"
-PROJECT = "questrom"
+PROJECT = "ba820-330120"
 judges = pd.read_gbq(SQL, PROJECT)
 
 judges.shape
