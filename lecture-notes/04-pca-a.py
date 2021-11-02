@@ -46,8 +46,38 @@ from matplotlib import cm
 # 4. create a boxplot of the column carat by cluster label (one boxplot for each cluster)
 # Optional. generate the silohouette plot for the solution (might take a few minutes)
 
+
+import pandas as pd
+from sklearn.cluster import KMeans
+from sklearn import metrics
+
+
+SQL = "SELECT * FROM 'questrom.datasets.diamonds'"
+dia = pd.read_gbq(SQL, "ba820-330120")
+dia.info()
+
+dia.head()
+
+dia = dia.loc[:,~dia.columns.isin(['cut','color','clarity'])]
+
+dia.info()
+
+model = KMeans(n_clusters=5)
+
+model.fit(dia)
+
+silo_overall = metrics.silhouette_score(dia, model.predict(dia))
+
+
+
+
+
+
+
+
+
 SQL = "SELECT * from `questrom.datasets.diamonds`"
-dia = pd.read_gbq(SQL, "questrom")
+dia = pd.read_gbq(SQL, "ba820-330120")
 dia.info()
 
 # keep numeric variables
@@ -58,10 +88,11 @@ scaler = StandardScaler()
 scaler.fit(dia_num)
 dia_scaled = scaler.transform(dia_num)
 
-# dia_scaled = scaler.fit_transform(dia_num)
+dia_scaled = scaler.fit_transform(dia_num)
 
 k5 = KMeans(5)
 k5_labs = k5.fit_predict(dia_scaled)
+
 np.unique(k5_labs)
 
 # append to the original dataset
@@ -72,16 +103,115 @@ sns.boxplot(data=dia, x="k5", y="carat")
 plt.show()
 
 # OPTIONAL:
-# skplot.metrics.plot_silhouette(dia_scaled, k5_labs)
+skplot.metrics.plot_silhouette(dia_scaled, k5_labs)
 
 k5.inertia_
+
+
+########## PCA hands on practice 
+
+
+SQL = "select * from 'questrom.dataset.judges'"
+judges = pd.read_gbq(SQL,"ba820-330120")
+
+judges.info()
+
+del judges['judge']
+
+judges.describe().T
+
+
+# correlation matrix
+
+jcor = judges.corr()
+sns.heatmap(jcor,cmap="Reds",center=0)
+plt.show()
+
+
+# fit our first PCA model
+
+pca = PCA()
+pcs = pca.fit_transform(judges)
+type(pcs)
+pcs.shape
+
+
+# variance explation ration --- pc explained 
+
+varexp = pca.explained_variance_ratio_
+type(varexp)
+varexp.shape
+
+
+# plot the variance explained the PC
+
+plt.title("Explained Variance per PC")
+sns.lineplot(range(1,len(varexp)+1),varexp)
+plt.show()
+
+
+# cumulative running percentage
+
+plt.title("Explained Variance per PC")
+sns.lineplot(range(1,len(varexp)+1),np.cumsum(varexp))
+plt.axhline(.95)
+plt.show()
+
+
+# explained variance - eigenvalue
+
+explvar = pca.explained_variance_
+
+plt.title("Egienvalue")
+sns.lineplot(range(1,len(explvar)+1),explvar)
+plt.axhline(1)
+plt.show()
+
+
+
+
+# exercise
+## fit a pca model for the diamonds
+dia_num = dia.select_dtypes("number")
+del dia_num['k5']
+
+dia_num.info()
+
+pca = PCA()
+pcs = pca.fit_transform(dia_num)
+type(pcs)
+varexp = pca.explained_variance_ratio_
+
+
+plt.title("explained variance")
+sns.lineplot(range(1,len(varexp)+1), varexp)
+plt.show()
+
+
+pca.n_components_
+
+COLS = ["PC" + str(i) for i in range(1,len(varexp)+1)]
+
+COLS
+
+comps = pca.components_
+
+loadings = pd.DataFrame(comps.T,columns=COLS, index = )
+
+
+
+
+
+
+
+
 
 
 
 ################################ PCA
 
 SQL = "SELECT * from `questrom.datasets.judges`"
-judges = pd.read_gbq(SQL, "questrom")
+judges = pd.read_gbq(SQL, "ba820-330120")
 
 judges.info()
 

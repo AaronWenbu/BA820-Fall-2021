@@ -12,6 +12,9 @@ from scipy.spatial.distance import pdist, squareform
 from sklearn.metrics import pairwise_distances 
 from sklearn.preprocessing import StandardScaler
 
+
+# read dataset from GCP
+
 SQL = "SELECT * from `questrom.datasets.mtcars`"
 YOUR_BILLING_PROJECT = "questrom"
 cars = pd.read_gbq(SQL, YOUR_BILLING_PROJECT)

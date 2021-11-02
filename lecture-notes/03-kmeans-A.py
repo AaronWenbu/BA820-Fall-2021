@@ -162,13 +162,69 @@ judges.sample(3)
 judges.k3.value_counts()
 
 # groupby
-judges.groupby("k3").mean()
+k3 = judges.groupby("k3").mean()
+
+k3.T
+
+sns.heatmap(k3, cmap='Reds')
+plt.show()
 
 ### take 5 minutes
 ### fit a cluster solution that has 5 clusters
 ### add to the judges dataset
 ### how many records in each cluster
 ### the "mean" profile to personas of the 5-cluster solution
+
+
+j = judges.copy()
+del j['k3']
+k5 = KMeans(5,random_state=820)
+k5.fit(j)
+
+# check iterations for convergence
+k5.n_iter_
+
+
+# put labs back on the original dataset
+j['k5'] = k5.predict(j)
+
+
+# start to profile/learn about our cluster
+j.k5.value_counts()
+
+#  groupby labels
+k5_profile = j.groupby('k5').mean()
+k5_profile.T
+
+sns.heatmap(k5_profile,cmap='Reds')
+plt.show()
+
+
+k5.inertia_
+
+
+## fit range of cluster solutions for 2 to 10. k=2, k3
+
+# interia
+
+
+
+for i in range(2,11):
+    j = judges.copy()
+    del j['k3']
+    k = KMeans(i,random_state=830)
+    k.fit(j)
+    print(k.inertia_)
+
+
+
+
+silo_overall = metrics.silhouette_score(j, k5.predict[j])
+silo_overall
+
+
+
+
 judges.sample(3)
 j = judges.copy()
 del j['k3']
@@ -225,6 +281,9 @@ k5.inertia_
 
 silo_overall = metrics.silhouette_score(j, k5.predict(j))
 silo_overall
+
+silo_sample = metrics.silhouette_samples(j,k5.predict(j))
+silo_sample
 
 
 # silo samples
